@@ -43,8 +43,8 @@ form.addEventListener('submit', async event => {
     return;
   }
   loaderItem.classList.add('loader');
-  loadButton.classList.remove('hide');
   const array = await getInfo(endpoint, inputValue, page);
+  loadButton.classList.remove('hide');
   totalHits = array.totalHits;
   if (array.hits.length === 0) {
     loadButton.classList.add('hide');
