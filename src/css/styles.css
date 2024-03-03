@@ -115,3 +115,23 @@
   display: none;
   z-index: 1035;
 }
+
+.load-button {
+  display: flex;
+  color: #ffffff;
+  background-color: #4e75ff;
+  padding: 8px 16px;
+  margin: 20px auto 0px auto;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  transition: background-color 300ms ease-in;
+}
+
+.load-button:hover {
+  background-color: #6c8cff;
+}
+
+.hide {
+  display: none;
+}
