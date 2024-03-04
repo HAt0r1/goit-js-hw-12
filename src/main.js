@@ -6,8 +6,8 @@ import { getDataFromServer as getInfo } from './js/pixabay-api';
 import { addElement, list } from './js/render-functions';
 
 let page = 1;
+const pageItems = 15;
 let inputValue;
-let totalHits;
 
 const form = document.querySelector('.image-search-form');
 const loaderItem = document.querySelector('.load-item');
@@ -28,13 +28,14 @@ function smoothScroll() {
 
 form.addEventListener('submit', async event => {
   event.preventDefault();
+  page = 1;
   list.innerHTML = null;
   inputValue = event.currentTarget.input.value.trim();
   if (inputValue === '') {
     iziToast.show({
       title: 'Error',
       titleColor: '#ffffff',
-      message: 'Write key word to search images',
+      message: 'Write keyword to search images',
       messageColor: '#ffffff',
       backgroundColor: '#EF4040',
       position: 'topRight',
@@ -43,20 +44,35 @@ form.addEventListener('submit', async event => {
     return;
   }
   loaderItem.classList.add('loader');
-  const array = await getInfo(endpoint, inputValue, page);
-  loadButton.classList.remove('hide');
-  totalHits = array.totalHits;
-  if (array.hits.length === 0) {
-    loadButton.classList.add('hide');
-    iziToast.show({
-      message:
-        'Sorry, there are no images matching your search query. Please try again!',
+  let array;
+  try {
+    array = await getInfo(endpoint, inputValue, page, pageItems);
+    if (array.hits.length < pageItems) {
+      loadButton.classList.add('hide');
+    } else {
+      loadButton.classList.remove('hide');
+    }
+    if (array.hits.length === 0) {
+      iziToast.show({
+        message:
+          'Sorry, there are no images matching your search query. Please try again!',
+        messageColor: '#ffffff',
+        backgroundColor: '#EF4040',
+        position: 'topRight',
+      });
+    }
+    loaderItem.classList.remove('loader');
+  } catch (error) {
+    loaderItem.classList.remove('loader');
+    iziToast.error({
+      title: error.name,
+      titleColor: '#ffffff',
+      message: error.message,
       messageColor: '#ffffff',
       backgroundColor: '#EF4040',
       position: 'topRight',
     });
   }
-  loaderItem.classList.remove('loader');
   addElement(array.hits);
   const lightbox = new SimpleLightbox('.image-item a', {
     animationSpeed: 300,
@@ -72,9 +88,9 @@ form.addEventListener('submit', async event => {
 loadButton.addEventListener('click', async () => {
   page++;
   loaderItem.classList.add('loader');
-  const data = await getInfo(endpoint, inputValue, page);
+  const array = await getInfo(endpoint, inputValue, page, pageItems);
   loaderItem.classList.remove('loader');
-  addElement(data.hits);
+  addElement(array.hits);
   smoothScroll();
   const lightbox = new SimpleLightbox('.image-item a', {
     animationSpeed: 300,
@@ -83,7 +99,8 @@ loadButton.addEventListener('click', async () => {
     overlayOpacity: 0.5,
   });
   lightbox.refresh();
-  if ((page - 1) * 15 >= totalHits) {
+
+  if (page * pageItems > array.totalHits) {
     loadButton.classList.add('hide');
     iziToast.show({
       message: "We're sorry, but you've reached the end of search results.",
