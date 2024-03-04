@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export async function getDataFromServer(url, value, page) {
+export async function getDataFromServer(url, value, page, pageItems) {
   const responce = await axios.get(url, {
     params: {
       key: '42558235-d544995829d65acb68be95adf',
@@ -9,7 +9,7 @@ export async function getDataFromServer(url, value, page) {
       orientation: 'horizontal',
       safesearch: true,
       page: page,
-      per_page: 15,
+      per_page: pageItems,
     },
   });
   return responce.data;
